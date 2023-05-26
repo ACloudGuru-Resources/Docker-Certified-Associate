@@ -1,0 +1,93 @@
+# Chapter 8.2
+# Installing Docker EE
+# Lesson URL: https://learn.acloud.guru/course/6b00566d-6246-4ebe-8257-f98f989321cf/learn/5d835ab7-796d-44b5-90f0-65de8b9ffd7d/61e902d5-f9e5-41b7-b72c-6c4c49b71fed/watch
+
+# Installing Docker EE
+
+# In order to start using the extended feature set offered by Docker EE, please install Docker EE. In this lesson, we will explore how to go about getting a Docker EE cluster up and running. We will gain some hands-on experience working with Docker EE and an environment where we can experiment.
+
+# Relevant Documentation
+
+- [Mirantis Products](https://docs.mirantis.com/welcome/)
+- [Mirantis Launchpad](https://github.com/Mirantis/launchpad)
+
+# Lesson Reference
+
+# Provision three playground servers.
+
+- UCP Manager
+  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Size: Large
+- UCP Worker
+  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Size: Small
+- UCP Worker with DTR
+  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Size: Medium
+
+# Log in to each node and enable passwordless sudo for cloud_user.
+
+sudo visudo
+
+# At the bottom of the file, add:
+
+cloud_user ALL=(ALL) NOPASSWD: ALL
+
+# Log in to the manager node and generate a key pair, then copy it to all three nodes to allow cloud_user to log in using the key.
+
+ssh-keygen -t rsa
+
+ssh-copy-id cloud_user@<manager private IP>
+ssh-copy-id cloud_user@<worker private IP>
+ssh-copy-id cloud_user@<dtr private IP>
+
+# Download and set up Mirantis launchpad.
+
+wget https://github.com/Mirantis/launchpad/releases/download/0.14.0/launchpad-linux-x64
+
+mv launchpad-linux-x64 launchpad
+
+chmod +x launchpad
+
+# Verify that we can execute launchpad.
+
+./launchpad version
+
+# Register our Docker EE cluster.
+
+./launchpad register
+
+# Create a cluster configuration file.
+
+cat << EOF > cluster.yaml
+apiVersion: launchpad.mirantis.com/v1beta3
+kind: DockerEnterprise
+metadata:
+  name: launchpad-ucp
+spec:
+  ucp:
+    version: 3.3.2
+    installFlags:
+    - --admin-username=admin
+    - --admin-password=secur1ty!
+    - --default-node-orchestrator=kubernetes
+  hosts:
+  - address: <manager private IP>
+    privateInterface: ens5
+    role: manager
+    ssh:
+      user: cloud_user
+      keyPath: ~/.ssh/id_rsa
+  - address: <worker private IP>
+    privateInterface: ens5
+    role: worker
+    ssh:
+      user: cloud_user
+      keyPath: ~/.ssh/id_rsa
+EOF
+
+./launchpad apply
+
+# We can access the UCP interface in a web browser at https://<UCP_SERVER_PUBLIC_IP>.
+
+# Use the credentials specified in cluster.yaml (in the ucp section) to log in. When asked for a license, select Skip for now.
