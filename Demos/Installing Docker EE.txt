@@ -16,13 +16,13 @@
 # Provision three playground servers.
 
 - UCP Manager
-  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Distribution: Ubuntu 20.04 Focal Fossa LTS
   - Size: Large
 - UCP Worker
-  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Distribution: Ubuntu 20.04 Focal Fossa LTS
   - Size: Small
 - UCP Worker with DTR
-  - Distribution: Ubuntu 18.04 Bionic Neaver LTS
+  - Distribution: Ubuntu 20.04 Focal Fossa LTS
   - Size: Medium
 
 # Log in to each node and enable passwordless sudo for cloud_user.
@@ -41,9 +41,14 @@ ssh-copy-id cloud_user@<manager private IP>
 ssh-copy-id cloud_user@<worker private IP>
 ssh-copy-id cloud_user@<dtr private IP>
 
+# Disable IPv6
+
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
 # Download and set up Mirantis launchpad.
 
-wget https://github.com/Mirantis/launchpad/releases/download/0.14.0/launchpad-linux-x64
+wget https://github.com/Mirantis/launchpad/releases/download/1.5.2/launchpad-linux-x64
 
 mv launchpad-linux-x64 launchpad
 
@@ -59,7 +64,7 @@ chmod +x launchpad
 
 # Create a cluster configuration file.
 
-cat << EOF > cluster.yaml
+cat << EOF > launchpad.yaml
 apiVersion: launchpad.mirantis.com/v1beta3
 kind: DockerEnterprise
 metadata:
@@ -90,4 +95,4 @@ EOF
 
 # We can access the UCP interface in a web browser at https://<UCP_SERVER_PUBLIC_IP>.
 
-# Use the credentials specified in cluster.yaml (in the ucp section) to log in. When asked for a license, select Skip for now.
+# Use the credentials specified in launchpad.yaml (in the ucp section) to log in. When asked for a license, select Skip for now.
