@@ -48,9 +48,9 @@ sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
 # Download and set up Mirantis launchpad.
 
-wget https://github.com/Mirantis/launchpad/releases/download/1.5.2/launchpad-linux-x64
+wget https://get.mirantis.com/launchpad/v1.5.6/launchpad_linux_amd64_1.5.6
 
-mv launchpad-linux-x64 launchpad
+mv launchpad_linux_amd64_1.5.6 launchpad
 
 chmod +x launchpad
 
@@ -71,11 +71,12 @@ metadata:
   name: launchpad-ucp
 spec:
   ucp:
-    version: 3.3.2
+    version: 3.6.20
     installFlags:
     - --admin-username=admin
     - --admin-password=secur1ty!
     - --default-node-orchestrator=kubernetes
+    - --force-minimums
   hosts:
   - address: <manager private IP>
     privateInterface: ens5
@@ -93,6 +94,6 @@ EOF
 
 ./launchpad apply
 
-# We can access the UCP interface in a web browser at https://<UCP_SERVER_PUBLIC_IP>.
+# We can access the UCP interface in a web browser at https://<UCP_MANAGER_PUBLIC_IP>.
 
 # Use the credentials specified in launchpad.yaml (in the ucp section) to log in. When asked for a license, select Skip for now.
